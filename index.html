@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>chan-code</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+  <style>
+    th {
+      vertical-align: top;
+      color: blueviolet !important;
+    }
+
+    td {
+      vertical-align: top;
+      color: blueviolet !important;
+      text-align: center;
+    }
+
+
+    .colr {
+      color: blueviolet !important;
+    }
+
+    input {
+      color: blueviolet !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <div class="container">
+      <div class="row" style="padding-top: 20px">
+        <div class="col">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th colspan="2">#</th>
+                <th colspan="2">item</th>
+                <th>title</th>
+                <!-- <th>name</th> -->
+                <!-- <th>data type</th> -->
+                <th>value</th>
+                <th>message</th>
+                <th colspan="2">#</th>
+              </tr>
+              <tr v-for="(item, index) in items" :key="index">
+                <td v-if="index == 0" :rowspan="items.length">
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined ">
+                    <button type="button" class="btn btn-outline-primary" v-on:click="addItem()">
+                      add
+                    </button>
+                  </div>
+                </td>
+                <td v-if="item.itemCol" :rowspan="item.itemCol ? item.itemCol.rowspan : ''" style="width: 100px">
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined ">
+                    <!-- <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    v-on:click="addItem()"
+                  >
+                    add
+                  </button> -->
+                    <button :disabled="item.delP" type="button" class="btn btn-outline-primary"
+                      v-on:click="delp(item.idxElm)">
+                      del
+                    </button>
+                  </div>
+                </td>
+                <td v-if="item.itemCol" :rowspan="item.itemCol ? item.itemCol.rowspan : ''">
+                  <input type="text" class="form-control" v-model="item.itemCol.text" />
+                </td>
+                <th v-if="item.typeCol" :rowspan="item.typeCol ? item.typeCol.rowspan : ''">
+                  {{ item.typeCol ? item.typeCol.text : "" }}
+                </th>
+                <!-- title-->
+                <td :rowspan="item.titleCol ? item.titleCol.rowspan : ''">
+                  <input type="text" class="form-control" v-model="item.titleCol.text" />
+                </td>
+                <td :rowspan="item.valueCol ? item.valueCol.rowspan : ''">
+                  <input type="text" class="form-control" v-model="item.valueCol.text" :name="item.idx" />
+                </td>
+                <td :rowspan="item.messageCol ? item.messageCol.rowspan : ''">
+                  <input v-if="item.type == 'invalid'" type="text" class="form-control" v-model="item.messageCol.text"
+                    :name="item.idx" />
+                </td>
+                <td style="width: 100px">
+                  <!-- <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="inlineCheckbox1"
+                  value="option1"
+                /> -->
+                  <!-- {{item}} -->
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined ">
+                    <!-- <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    v-on:click="addCondition(item.idxElm, item.type)"
+                  >
+                    add
+                  </button> -->
+                    <button :disabled="item.delbtn" type="button" class="btn btn-outline-primary"
+                      v-on:click="delCondition(item.idxElm, item.type, item.idx)">
+                      del
+                    </button>
+                  </div>
+                </td>
+                <td v-if="item.typeCol" :rowspan="item.typeCol ? item.typeCol.rowspan : ''">
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined ">
+                    <button type="button" class="btn btn-outline-primary"
+                      v-on:click="addCondition(item.idxElm, item.type)">
+                      add
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 20px; margin-bottom: 20px">
+        <div class="col">
+          <div style="width: 100%; text-align: center;">
+            <div class="btn-group" role="group" aria-label="Basic outlined ">
+              <button type="button" class="btn btn-outline-primary" v-on:click="view()">
+                view
+              </button>
+              <button :disabled="!show" type="button" class="btn btn-outline-primary"
+                v-on:click="copyTable()">copy</button>
+              <button type="button" class="btn btn-outline-primary" v-on:click="clear()">clear</button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col" id="tabledata">
+          <table class="table table-bordered" v-if="show">
+            <thead>
+              <tr>
+                <th rowspan="3">#</th>
+                <th v-for="(item, index) in dataTbl[0]" :key="index" :colspan="item.colspan">
+                  {{ item.text }}
+                </th>
+                <th rowspan="3">result</th>
+                <th rowspan="3">data</th>
+              </tr>
+
+              <tr>
+                <th v-for="(item, index) in dataTbl[1]" :key="index" :colspan="item.colspan">
+                  {{ item.text }}
+                </th>
+              </tr>
+
+              <tr>
+                <th v-for="(item, index) in dataTbl[2]" :key="index">
+                  {{ item.title }}
+                </th>
+              </tr>
+
+              <tr v-for="(item1, index1) in dataTbl[3]" :key="index1">
+                <td>{{ index1 + 1 }}</td>
+                <td v-for="(item2, index2) in dataTbl[2]" :key="index2">
+                  {{ item1.items.includes(item2.id) ? "x" : "" }}
+                </td>
+                <td>
+                  <span v-if="item1.ok">OK</span>
+                  <span v-else>NG</span>
+                </td>
+                <td style="text-align: left;">{{item1.data}}</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+<script>
+  var app = new Vue({
+    el: '#app',
+
+    props: {
+      msg: String,
+    },
+    data: function () {
+      return {
+        show: false,
+        val: "",
+        data: [],
+        numCol: 18,
+        items: [],
+        temp: [
+          {
+            delP: true,
+            type: "valid",
+            idxElm: 0,
+            itemCol: { rowspan: 4, text: "item0" },
+            typeCol: { rowspan: 2, text: "valid" },
+            titleCol: { rowspan: null, text: "valid-title-0" },
+            dataTypeCol: { rowspan: null, text: "number" },
+            valueCol: { rowspan: null, text: "0" },
+            idx: 0,
+            end: false,
+          },
+          {
+            type: "valid",
+            idxElm: 0,
+            itemCol: null,
+            typeCol: null,
+            titleCol: { rowspan: null, text: "valid-title-1" },
+            dataTypeCol: { rowspan: null, text: "string" },
+            valueCol: { rowspan: null, text: "\"value-1\"" },
+            idx: 1,
+            end: true,
+          },
+          {
+            type: "invalid",
+            idxElm: 0,
+            idx: 0,
+            typeCol: { rowspan: 2, text: "invalid" },
+            titleCol: { rowspan: null, text: "invalid-title-0" },
+            dataTypeCol: { rowspan: null, text: "string" },
+            valueCol: { rowspan: null, text: "\"value-0\"" },
+            messageCol: { rowspan: null, text: "message error 01" },
+            end: false,
+          },
+          {
+            type: "invalid",
+            idxElm: 0,
+            idx: 1,
+            itemCol: null,
+            typeCol: null,
+            titleCol: { rowspan: null, text: "invalid-title-1" },
+            dataTypeCol: { rowspan: null, text: "number" },
+            valueCol: { rowspan: null, text: "0" },
+            messageCol: { rowspan: null, text: "message error 02" },
+            end: true,
+          },
+        ],
+        dataSet: new Set(),
+        out: "",
+        dataTbl: [],
+      };
+    },
+    async mounted() {
+      const o = this.matrix(["a", "b", "c"], "");
+      for (let i = 0; i <= o.length; i++) {
+        this.dataSet.add(o[i]);
+      }
+    },
+    created() {
+      this.items = this.temp;
+    },
+    methods: {
+      setVal() {
+        this.val = JSON.stringify(this.data);
+      },
+      matrix(n, val) {
+        let rs = [];
+        for (let i = 0; i < n.length; i++) {
+          const item = n[i];
+
+          let v = val + item;
+          v = v.split("").sort();
+          v = v.join("");
+          if (!val.includes(item)) {
+            rs.push(v);
+          }
+          if (v.length <= n.length) {
+            let ar = n;
+            ar = n.filter(function (it) {
+              return it !== item;
+            });
+            const ns = this.matrix(ar, v);
+            for (let k = 0; k < ns.length; k++) {
+              rs.push(ns[k]);
+            }
+          }
+        }
+        return rs;
+      },
+      convetData(dataIn) {
+        let rs = [];
+        for (let i = 0; i < dataIn.length; i++) {
+          const item = dataIn[i];
+          let row0 = {
+            delP: dataIn.length == 1,
+            type: "valid",
+            idxElm: i,
+            itemCol: {
+              rowspan: item.valid.length + item.invalid.length,
+              text: item.name,
+            },
+          };
+          rs.push(row0);
+          for (let j = 0; j < item.valid.length; j++) {
+            const valid = item.valid[j];
+            if (item.valid.length == 1) {
+              row0.delbtn = true;
+            }
+            if (j == 0) {
+              row0.typeCol = { rowspan: item.valid.length, text: "valid" };
+              row0.titleCol = { rowspan: null, text: valid.title };
+              row0.valueCol = { rowspan: null, text: valid.value };
+              row0.dataTypeCol = { rowspan: null, text: valid.dataType };
+              row0.idx = valid.idx;
+            } else {
+              const rowV = { type: "valid", idxElm: i };
+              rowV.itemCol = null;
+              rowV.typeCol = null;
+              rowV.titleCol = { rowspan: null, text: valid.title };
+              rowV.valueCol = { rowspan: null, text: valid.value };
+              rowV.dataTypeCol = { rowspan: null, text: valid.dataType };
+              rowV.idx = valid.idx;
+              rowV.end = j == item.valid.length - 1;
+              rs.push(rowV);
+            }
+          }
+          // invalid
+
+          for (let j = 0; j < item.invalid.length; j++) {
+            const invalid = item.invalid[j];
+
+            const rowV = { type: "invalid", idxElm: i, idx: invalid.idx };
+            if (item.invalid.length == 1) {
+              rowV.delbtn = true;
+            }
+            if (j == 0) {
+              rowV.typeCol = { rowspan: item.invalid.length, text: "invalid" };
+              rowV.titleCol = { rowspan: null, text: invalid.title };
+              rowV.valueCol = { rowspan: null, text: invalid.value };
+              rowV.messageCol = { rowspan: null, text: invalid.message };
+              rowV.dataTypeCol = { rowspan: null, text: invalid.dataType };
+            } else {
+              rowV.itemCol = null;
+              rowV.typeCol = null;
+              rowV.titleCol = { rowspan: null, text: invalid.title };
+              rowV.valueCol = { rowspan: null, text: invalid.value };
+              rowV.messageCol = { rowspan: null, text: invalid.message };
+              rowV.dataTypeCol = { rowspan: null, text: invalid.dataType };
+              rowV.end = j == item.invalid.length - 1;
+            }
+            rs.push(rowV);
+          }
+        }
+
+        return rs;
+      },
+      addItem() {
+        this.show = false;
+        this.data = this.deconvert(this.items);
+        const item = {
+          name: "item" + this.data.length,
+          valid: [{ idx: 0, type: "valid", title: "valid-title-0", name: "var0", dataType: "string", value: "\"value-0\"" }],
+          invalid: [
+            { idx: 0, type: "invalid", title: "invalid-title-0", name: "var0", dataType: "string", value: "\"value-0\"", message: "message error" },
+          ],
+        };
+        this.data.push(item);
+        this.items = this.convetData(this.data);
+        this.genData();
+      },
+      addCondition(index, type) {
+        this.show = false;
+        this.data = this.deconvert(this.items);
+        const item = this.data[index];
+        item[type].push({
+          idx: item[type].length,
+          type: type,
+          title: type + "-title-" + item[type].length,
+          name: "var1",
+          dataType: "string",
+          value: "'value-" + item[type].length + "'",
+        });
+
+        this.items = this.convetData(this.data);
+        this.genData();
+      },
+      delCondition(idx1, type, id) {
+        this.show = false;
+        this.data = this.deconvert(this.items);
+
+        const item = this.data[idx1];
+        let conditions = item[type];
+        if (conditions.length == 1) {
+          return;
+        }
+
+        conditions.splice(id, 1);
+        for (let i = 0; i < conditions.length; i++) {
+          const element = conditions[i];
+          element.idx = i;
+        }
+
+        this.items = this.convetData(this.data);
+        this.genData();
+      },
+      deconvert(items) {
+        let rs = [];
+        let itemNm;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.itemCol && item.typeCol) {
+            itemNm = item.itemCol.text;
+            rs.push({
+              name: item.itemCol.text,
+              valid: [
+                { idx: item.idx, title: item.titleCol.text, name: item.itemCol.text, dataType: item.dataTypeCol.text, value: item.valueCol.text },
+              ],
+              invalid: [],
+            });
+          } else {
+            let lastE = rs[rs.length - 1];
+            if (item.type == "valid") {
+              lastE.valid.push({
+                idx: item.idx,
+                type: "valid",
+                title: item.titleCol.text,
+                value: item.valueCol.text,
+                name: "",
+                dataType: item.dataTypeCol.text,
+              });
+            } else {
+              lastE.invalid.push({
+                idx: item.idx,
+                type: "invalid",
+                title: item.titleCol.text,
+                value: item.valueCol.text,
+                message: item.messageCol.text,
+                messageJson: { itemName: itemNm, message: item.messageCol.text },
+                name: "",
+                dataType: item.dataTypeCol.text,
+              });
+            }
+          }
+        }
+        return rs;
+      },
+
+      tophop(ar1, ar2) {
+        let rs = [];
+        for (let i = 0; i < ar1.length; i++) {
+          const e1 = ar1[i];
+          for (let j = 0; j < ar2.length; j++) {
+            const e2 = ar2[j];
+            rs.push(e1 + "_" + e2);
+          }
+        }
+        return rs;
+      },
+      generate(data) {
+
+        if (data.length == 1) {
+          const out = {
+            valid: data[0].valid,
+            invalid: data[0].invalid,
+          };
+
+
+          return out;
+        }
+        // const data = [
+        //   {
+        //     name: "a",
+        //     valid: ["av1", "av2", "av3"],
+        //     invalid: ["ai1", "ai2", "ai3"],
+        //   },
+        //   {
+        //     name: "b",
+        //     valid: ["bv1", "bv2", "bv3"],
+        //     invalid: ["bi1", "bi2", "bi3"],
+        //   },
+        // ];
+        const e0 = data[0];
+        const e0v = e0.valid;
+        const e0i = e0.invalid;
+        let ls = [];
+        for (let i = 1; i < data.length; i++) {
+          let arr = [];
+          data[i].valid.forEach((e) => {
+            arr.push(e);
+          });
+          data[i].invalid.forEach((e) => {
+            arr.push(e);
+          });
+          ls.push(arr);
+        }
+        let ov = this.tophop(e0v, ls[0]);
+        for (let i = 1; i < ls.length; i++) {
+          const e = ls[i];
+
+          ov = this.tophop(ov, e);
+        }
+
+        let oi = this.tophop(e0i, ls[0]);
+        for (let i = 1; i < ls.length; i++) {
+          const e = ls[i];
+          oi = this.tophop(oi, e);
+        }
+
+
+        return {
+          valid: ov,
+          invalid: oi,
+        };
+      },
+      genData() {
+        const row0 = [];
+        const row1 = [];
+        const row2 = [];
+        let newO = [];
+        let cnt = 0;
+        let map = new Map();
+        for (let i = 0; i < this.data.length; i++) {
+          const element = this.data[i];
+          row0.push({
+            index: i,
+            text: element.name,
+            colspan: element.valid.length + element.invalid.length,
+          });
+
+          row1.push({ text: "valid", item: element.name, colspan: element.valid.length });
+          row1.push({ text: "invalid", item: element.name, colspan: element.invalid.length });
+
+          let o = { name: element.name, valid: [], invalid: [] };
+          for (let j = 0; j < element.valid.length; j++) {
+            const v = element.valid[j];
+            v.id = "valid-" + i + "-" + cnt++;
+            map.set(v.id, cnt - 1);
+            row2.push(v);
+            o.valid.push(v.id);
+          }
+
+          for (let j = 0; j < element.invalid.length; j++) {
+            const iv = element.invalid[j];
+            iv.id = "invalid-" + i + "-" + cnt++;
+            row2.push(iv);
+            o.invalid.push(iv.id);
+            map.set(iv.id, cnt - 1);
+          }
+
+          //new obj
+          // {name: string, valid: [], invalid:[]}
+          newO.push(o);
+        }
+        this.dataTbl = [];
+        this.dataTbl.push(row0);
+        this.dataTbl.push(row1);
+        this.dataTbl.push(row2);
+
+        // data matrix
+
+        const matrix = this.generate(newO);
+        let fx = [];
+        let rown = [];
+
+        for (let i = 0; i < matrix.valid.length; i++) {
+          const e = matrix.valid[i];
+          const arr = e.split("_");
+          fx.push(arr);
+          const rv = [];
+          for (let j = 0; j < arr.length; j++) {
+            const element = arr[j];
+            rv.push(element);
+          }
+          const rsOK = rv.filter((word) => word.includes("invalid")).length == 0;
+          let dataJson = "{\"data\": { ";
+          let message = [];
+          for (let k = 0; k < rv.length; k++) {
+            const element = rv[k];
+            const item = row2.filter(f => f.id === element)[0];
+            const idItem = item.id.split("-")[1];
+            row1[idItem].item;
+            dataJson = dataJson + "\"" + [row0[idItem].text] + "\": " + item.value;
+            if (k < rv.length - 1) {
+              dataJson = dataJson + ","
+            }
+            if (item.messageJson != null && item.messageJson != undefined)
+              message.push(JSON.stringify(item.messageJson));
+          }
+          dataJson = dataJson + " }, \"message\": [ " + message.join(",") + " ] }";
+          rown.push({ items: rv, ok: rsOK, data: dataJson });
+        }
+        for (let i = 0; i < matrix.invalid.length; i++) {
+          const e = matrix.invalid[i];
+          const arr = e.split("_");
+          fx.push(arr);
+          const ri = [];
+          for (let j = 0; j < arr.length; j++) {
+            const element = arr[j];
+            ri.push(element);
+          }
+          let dataJson = "{\"data\": {";
+          let message = [];
+          for (let k = 0; k < ri.length; k++) {
+            const element = ri[k];
+            const item = row2.filter(f => f.id === element)[0];
+            const idItem = item.id.split("-")[1];
+            row1[idItem].item;
+            dataJson = dataJson + "\"" + [row0[idItem].text] + "\": " + item.value;
+            if (k < ri.length - 1) {
+              dataJson = dataJson + ","
+            }
+            console.log("JSON.stringify(item.messageJson):" + JSON.stringify(item.messageJson))
+            if (item.messageJson != null && item.messageJson != undefined)
+              message.push(JSON.stringify(item.messageJson));
+
+            console.log("aaaaaa:" + JSON.stringify(row0[idItem]))
+
+            console.log("bbbbbb:" + JSON.stringify(item))
+          }
+          dataJson = dataJson + " }, \"message\": [ " + message.join(",") + " ] }";
+          rown.push({ items: ri, ok: false, data: dataJson });
+        }
+
+        this.dataTbl.push(rown);
+      },
+      delp(idx) {
+        this.show = false;
+        this.data = this.deconvert(this.items.filter(f => f.idxElm != idx));
+        this.items = this.convetData(this.data);
+      },
+      view() {
+        this.data = this.deconvert(this.items);
+        this.items = this.convetData(this.data);
+        this.genData();
+        this.show = true;
+      },
+      clear() {
+
+        this.items = this.temp;
+        this.show = false;
+      },
+      copyTable() {
+        navigator.clipboard.writeText(document.getElementById('tabledata').innerHTML);
+      }
+    }
+
+  })
+</script>
+
+</html>
